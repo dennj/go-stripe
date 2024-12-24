@@ -19,7 +19,11 @@ import (
 
 // Handler is the exported function Vercel uses as the entry point
 func Handler(w http.ResponseWriter, r *http.Request) {
+	stripe.Key = "sk_test_51QZOy3Ln4tyvSVbGmXJ34MrjquL5Nks4yCDNQBcwonPD4z8jnfQAUrZE2mXRCjQUlcTjoiJA8EFqY8zUfLsAqztk009xXRYtII"
+
 	switch r.URL.Path {
+	case "/":
+		http.FileServer(http.Dir("public"))
 	case "/create-checkout-session":
 		createCheckoutSession(w, r)
 	case "/create-portal-session":
