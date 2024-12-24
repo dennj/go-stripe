@@ -16,20 +16,7 @@ import (
 	"github.com/stripe/stripe-go/v81/webhook"
 )
 
-func main() {
-	// This is your test secret API key.
-	stripe.Key = "sk_test_51QZOy3Ln4tyvSVbGmXJ34MrjquL5Nks4yCDNQBcwonPD4z8jnfQAUrZE2mXRCjQUlcTjoiJA8EFqY8zUfLsAqztk009xXRYtII"
-
-	http.Handle("/", http.FileServer(http.Dir("public")))
-	http.HandleFunc("/create-checkout-session", createCheckoutSession)
-	http.HandleFunc("/create-portal-session", createPortalSession)
-	http.HandleFunc("/webhook", handleWebhook)
-	addr := "localhost:4242"
-	log.Printf("Listening on %s", addr)
-	log.Fatal(http.ListenAndServe(addr, nil))
-}
-
-// Exported function that Vercel uses as the entry point
+// Handler is the exported function Vercel uses as the entry point
 func Handler(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/create-checkout-session":
@@ -52,7 +39,7 @@ func createCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	lookup_key := r.PostFormValue("lookup_key")
 
-	domain := "http://localhost:4242"
+	domain := "https://go-stripe.vercel.app"
 	params := &stripe.PriceListParams{
 		LookupKeys: stripe.StringSlice([]string{
 			lookup_key,
@@ -61,6 +48,8 @@ func createCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	i := price.List(params)
 	if !i.Next() {
 		log.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>> Add a price lookup key to checkout.html line 27 for the demo <<<<<<<<<<<<<<<<<<<<<<<<")
+		http.Error(w, "Price not found", http.StatusBadRequest)
+		return
 	}
 	var price *stripe.Price
 	for i.Next() {
@@ -70,7 +59,7 @@ func createCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	checkoutParams := &stripe.CheckoutSessionParams{
 		Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
-			&stripe.CheckoutSessionLineItemParams{
+			{
 				Price:    stripe.String(price.ID),
 				Quantity: stripe.Int64(1),
 			},
@@ -86,15 +75,15 @@ func createCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	s, err := session.New(checkoutParams)
 	if err != nil {
 		log.Printf("session.New: %v", err)
+		http.Error(w, "Failed to create checkout session", http.StatusInternalServerError)
+		return
 	}
 
 	http.Redirect(w, r, s.URL, http.StatusSeeOther)
 }
 
 func createPortalSession(w http.ResponseWriter, r *http.Request) {
-	domain := "http://localhost:4242"
-	// For demonstration purposes, we're using the Checkout session to retrieve the customer ID.
-	// Typically this is stored alongside the authenticated user in your database.
+	domain := "https://go-stripe.vercel.app/"
 	r.ParseForm()
 	sessionId := r.PostFormValue("session_id")
 
@@ -112,7 +101,7 @@ func createPortalSession(w http.ResponseWriter, r *http.Request) {
 		Customer:  stripe.String(s.Customer.ID),
 		ReturnURL: stripe.String(domain),
 	}
-	ps, _ := portalsession.New(params)
+	ps, err := portalsession.New(params)
 	log.Printf("ps.New: %v", ps.URL)
 
 	if err != nil {
