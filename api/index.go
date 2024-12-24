@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/stripe/stripe-go/v81"
 	portalsession "github.com/stripe/stripe-go/v81/billingportal/session"
@@ -23,7 +24,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.URL.Path {
 	case "/":
-		http.FileServer(http.Dir("public"))
+		http.ServeFile(w, r, "../public/index.html")
 	case "/create-checkout-session":
 		createCheckoutSession(w, r)
 	case "/create-portal-session":
@@ -56,11 +57,9 @@ func createCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Price not found", http.StatusBadRequest)
 		return
 	}
-	var price *stripe.Price
-	for i.Next() {
-		p := i.Price()
-		price = p
-	}
+
+	price := i.Price()
+
 	checkoutParams := &stripe.CheckoutSessionParams{
 		Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
@@ -83,6 +82,10 @@ func createCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create checkout session", http.StatusInternalServerError)
 		return
 	}
+
+	// Correctly replace {CHECKOUT_SESSION_ID} with the actual ID
+	updatedSuccessURL := strings.Replace(*checkoutParams.SuccessURL, "{CHECKOUT_SESSION_ID}", s.ID, -1)
+	checkoutParams.SuccessURL = stripe.String(updatedSuccessURL)
 
 	http.Redirect(w, r, s.URL, http.StatusSeeOther)
 }

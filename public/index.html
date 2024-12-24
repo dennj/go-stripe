@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Payment Test</title>
+</head>
+<body>
+    <h1>Welcome to Stripe Payment Test</h1>
+    <button id="payButton">Pay with Stripe</button>
+
+    <script>
+        document.getElementById('payButton').addEventListener('click', function() {
+            fetch('/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'lookup_key=pk_test_51QZOy3Ln4tyvSVbG4KYQS8GmqYwrw8quvbwGxH1Eyt2NXZSKexoeBWamhuUF9N2SNw0gYAPlyGSYGZZVPDa4rcXv00dbCJAt80'
+            }).then(function(response) {
+                return response.json();
+            }).then(function(session) {
+                window.location.href = session.url; // Redirect to Stripe checkout page
+            }).catch(function(error) {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
