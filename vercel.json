@@ -2,13 +2,13 @@
     "version": 2,
     "builds": [
       {
-        "src": "*.go",
+        "src": "server.go",
         "use": "@vercel/go"
       }
     ],
     "routes": [
       {
-        "src": "/(.*)",
+        "src": "/.*",
         "dest": "server.go"
       }
     ]
