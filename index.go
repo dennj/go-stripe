@@ -14,6 +14,7 @@ import (
 	"github.com/stripe/stripe-go/v81/checkout/session"
 	"github.com/stripe/stripe-go/v81/price"
 	"github.com/stripe/stripe-go/v81/webhook"
+	"golang.org/x/exp/slog"
 )
 
 // Handler is the exported function Vercel uses as the entry point
@@ -86,8 +87,7 @@ func createPortalSession(w http.ResponseWriter, r *http.Request) {
 	domain := "https://go-stripe.vercel.app/"
 	r.ParseForm()
 	sessionId := r.PostFormValue("session_id")
-
-	fmt.Print(sessionId)
+	slog.Info("createPortalSession", "sessionId", sessionId)
 	s, err := session.Get(sessionId, nil)
 
 	if err != nil {
@@ -102,13 +102,12 @@ func createPortalSession(w http.ResponseWriter, r *http.Request) {
 		ReturnURL: stripe.String(domain),
 	}
 	ps, err := portalsession.New(params)
-	log.Printf("ps.New: %v", ps.URL)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Printf("ps.New: %v", err)
 		return
 	}
+	log.Printf("ps.New: %v", ps.URL)
 
 	http.Redirect(w, r, ps.URL, http.StatusSeeOther)
 }
@@ -144,7 +143,7 @@ func handleWebhook(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Subscription deleted for %d.", subscription.ID)
+		log.Printf("Subscription deleted for %s.", subscription.ID)
 		// Then define and call a func to handle the deleted subscription.
 		// handleSubscriptionCanceled(subscription)
 	case "customer.subscription.updated":
@@ -155,7 +154,7 @@ func handleWebhook(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Subscription updated for %d.", subscription.ID)
+		log.Printf("Subscription updated for %s.", subscription.ID)
 		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		// handleSubscriptionUpdated(subscription)
 	case "customer.subscription.created":
@@ -166,7 +165,7 @@ func handleWebhook(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Subscription created for %d.", subscription.ID)
+		log.Printf("Subscription created for %s.", subscription.ID)
 		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		// handleSubscriptionCreated(subscription)
 	case "customer.subscription.trial_will_end":
@@ -177,7 +176,7 @@ func handleWebhook(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Subscription trial will end for %d.", subscription.ID)
+		log.Printf("Subscription trial will end for %s.", subscription.ID)
 		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":
@@ -188,7 +187,7 @@ func handleWebhook(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Active entitlement summary updated for %d.", subscription.ID)
+		log.Printf("Active entitlement summary updated for %s.", subscription.ID)
 		// Then define and call a func to handle active entitlement summary updated.
 		// handleEntitlementUpdated(subscription)
 	default:
