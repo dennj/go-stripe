@@ -7,6 +7,8 @@ github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5Cc
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stripe/stripe-go/v81 v81.0.0 h1:7xqKVXIjhFoSEUzXXPON7oYFRupOyhDG5R7tRVyrgeE=
 github.com/stripe/stripe-go/v81 v81.0.0/go.mod h1:C/F4jlmnGNacvYtBp/LUHCvVUJEZffFQCobkzwY1WOo=
+github.com/tbxark/g4vercel v0.0.4 h1:KJGsz0/tarMKwEQbBlToAvcUTvPU5XMz1NJ7WpgwHAw=
+github.com/tbxark/g4vercel v0.0.4/go.mod h1:ixnfFruSriTYP/dZ+GxB/hkYMOhmozYkEZ780Ws2Hhk=
 golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 h1:1UoZQm6f0P/ZO0w1Ri+f+ifG/gXhegadRdwBIXEFWDo=
 golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67/go.mod h1:qj5a5QZpwLU2NLQudwIN5koi3beDhSAlJwa67PuM98c=
 golang.org/x/net v0.0.0-20210520170846-37e1c6afe023/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
