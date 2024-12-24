@@ -24,7 +24,41 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.URL.Path {
 	case "/":
-		http.ServeFile(w, r, "../public/index.html")
+		htmlContent := `
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Stripe Payment Test</title>
+	</head>
+	<body>
+		<h1>Welcome to Stripe Payment Test</h1>
+		<button id="payButton">Pay with Stripe</button>
+	
+		<script>
+			document.getElementById('payButton').addEventListener('click', function() {
+				fetch('/create-checkout-session', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: 'lookup_key=prod_RSME4fcFjlrqA4'
+				}).then(function(response) {
+					return response.json();
+				}).then(function(session) {
+					window.location.href = session.url; // Redirect to Stripe checkout page
+				}).catch(function(error) {
+					console.error('Error:', error);
+				});
+			});
+		</script>
+	</body>
+	</html>
+	`
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(htmlContent))
+
 	case "/create-checkout-session":
 		createCheckoutSession(w, r)
 	case "/create-portal-session":
